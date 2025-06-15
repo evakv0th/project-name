@@ -1,26 +1,38 @@
 import { Injectable } from '@nestjs/common';
 import { CreateOfficeDto } from './dto/create-office.dto';
 import { UpdateOfficeDto } from './dto/update-office.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Office } from './entities/office.entity';
 
 @Injectable()
 export class OfficesService {
-  create(createOfficeDto: CreateOfficeDto) {
-    return 'This action adds a new office';
+  constructor(
+    @InjectRepository(Office)
+    private officesRepository: Repository<Office>,
+  ) {}
+  async create(createOfficeDto: CreateOfficeDto): Promise<Office> {
+    const office = this.officesRepository.create(createOfficeDto);
+    return this.officesRepository.save(office);
   }
 
-  findAll() {
-    return `This action returns all offices`;
+  async findAll(): Promise<Office[]> {
+    return this.officesRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} office`;
+  async findOne(id: number): Promise<Office | null> {
+    return this.officesRepository.findOneBy({ id });
   }
 
-  update(id: number, updateOfficeDto: UpdateOfficeDto) {
-    return `This action updates a #${id} office`;
+  async update(
+    id: number,
+    updateOfficeDto: UpdateOfficeDto,
+  ): Promise<Office | null> {
+    await this.officesRepository.update(id, updateOfficeDto);
+    return this.officesRepository.findOneBy({ id });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} office`;
+  async remove(id: number): Promise<void> {
+    await this.officesRepository.delete(id);
   }
 }
